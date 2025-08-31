@@ -41,7 +41,7 @@ public class SqlBooks {
             session = ssFactory.getCurrentSession();
             session.beginTransaction();
 
-            List<Books> listBooks = session.createQuery("from Books").getResultList();
+            List<Books> listBooks = session.createQuery("from Books", Books.class).getResultList();
 
             for (Books book : listBooks) {
                 model.addRow(new Object[]{book.getId(), book.getName(), book.getType(), book.getWrite(), book.getPage(), book.getPublisher()});
@@ -67,7 +67,7 @@ public class SqlBooks {
             session = ssFactory.getCurrentSession();
             session.beginTransaction();
 
-            List<Books> listBooks = session.createQuery("from Books b WHERE b.name LIKE :name AND b.type LIKE :type AND b.write LIKE :write AND b.publisher LIKE :publisher")
+            List<Books> listBooks = session.createQuery("from Books b WHERE b.name LIKE :name AND b.type LIKE :type AND b.write LIKE :write AND b.publisher LIKE :publisher", Books.class)
                     .setParameter("name", "%" + name + "%")
                     .setParameter("type", "%" + type + "%")
                     .setParameter("write", "%" + writer + "%")
@@ -108,20 +108,20 @@ public class SqlBooks {
             }
         }
     }
-    
+
     public void update(int bookID, Books newBook) {
         try {
             session = ssFactory.getCurrentSession();
             session.beginTransaction();
-            
-            Books _book = session.get(Books.class, bookID);
-            
+
+            Books _book = session.getReference(Books.class, bookID);
+
             _book.setName(newBook.getName());
             _book.setPage(newBook.getPage());
             _book.setPublisher(newBook.getPublisher());
             _book.setType(newBook.getType());
             _book.setWrite(newBook.getWrite());
-            
+
             session.merge(_book);
 
             session.getTransaction().commit();
@@ -135,14 +135,13 @@ public class SqlBooks {
             }
         }
     }
-    
-    public void delete(Books book){
+
+    public void delete(Books book) {
         try {
             session = ssFactory.getCurrentSession();
             session.beginTransaction();
-            
-            Books _book = session.get(Books.class, book.getId());
-            session.remove(_book);
+
+            session.remove(book);
 
             session.getTransaction().commit();
         } catch (Exception e) {
